@@ -1,0 +1,6 @@
+#base line stuff to run the git hooks and similar 
+pre-commit
+black
+flake8
+
+#tool specific stuff

@@ -75,6 +75,9 @@ else:
     # if not simply add the input file to the run list
     file_list = [inpt]
 
+# make a html file start up and return as string
+#!# html = make_html.start(title) 
+    
 # loop over all files we want to look at here 
 for f in file_list:
     # if file is matlab read it using the data reader tool
@@ -93,7 +96,7 @@ for f in file_list:
             ncol = 0
         
         df = pd.read_csv(f, sep=delim, header=ncol, index_col=nrow)
-
+       
         data = df.values
             
         
@@ -102,19 +105,28 @@ for f in file_list:
         print ("The file",f,"does not look like a .mat, .csv or .tsv file and should have been filtered out.\nStrange things might be going on with the code.")
         continue
 
+    # plot figs for data and store as str64 to later add to the html file 
+    
+
+    
 
     # now do things to the data:
-    mean = np.mean(data)
-    std = np.std(data)
-    median = np.median(data)
-    fmax = np.amax(data)
-    fmin = np.amin(data)
-    fsnr = snr(data)
-    uniq = len(np.unique(data))
-    counts = data.shape[0]*data.shape[1]
-    zeroes = len(np.where(data == 0))
-    var = np.var(data)
-    skew = scipy.stats.skew(data).mean()
-    
+    stats = {
+        "mean":np.mean(data),
+        "std":np.std(data),
+        "median":np.median(data),
+        "max":np.amax(data),
+        "min":np.amin(data),
+        "snr":snr(data).mean(),
+        "uniq":len(np.unique(data)),
+        "elems":data.shape[0]*data.shape[1],
+        "zeroes":len(np.where(data == 0)),
+        "variance":np.var(data),
+        "skew":scipy.stats.skew(data).mean()
+    }
 
-    
+    # add stats and plots to html file
+    #!# html = make_html.add(stats,dist_plot, heatmap, pca_plot)
+
+# once all files are looped over and printed to html close and write html
+#!# make_html.write(out)

@@ -67,6 +67,7 @@ else:
     # if not simply add the input file to the run list
     file_list = [inpt]
 
+tables = list() # create an empty list to store the html objects with stats for each file in file list. This will later be added to the report in a for loop based fashion. 
     
 # loop over all files we want to look at here 
 for f in file_list:

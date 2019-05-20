@@ -6,39 +6,22 @@ Main script of the EDA tool. Most of the executing code can be found here while 
 import numpy as np
 import argparse
 import os
-import pandas as pd
-import scipy.stats
+import pandas as pd 
+import scipy.stats # used to get a number of statistics out from the data
+from jinja2 import FileSystemLoader, Environment # used to generate the html report based on manualy created template files
+
 
 # plugins for the tool
 from bin import data_reader
+from bin import make_hist
+from bin import make_heatmap
+from bin import make_PCA
+
 
 """
 needed functions: 
-read all files in a directory. 
-import either tab seperated data matrixes or matlab files. 
-get data properties such as: 
-    Uniq values y
-    min y
-    max y
-    n zeroes y
-    mean y
-    median y 
-    std y  
-    variance y
-    skewness? y
-    number of values in matrix y
-    SNR ratio y
-
-plot heatmap on values 
-plot distrubutions 
-
-get common values 
-
-get top 5 min and max values for comparison. 
-
-dbscan + isolation forest?
-
-PCA like? 
+ 
+dbscan
 
 Once this is all done print the whole thing to html with a page for each data set and a joint distrubution image. 
 """
@@ -66,6 +49,15 @@ out = args.out
 rm_row_name = args.row_name
 rm_col_name = args.col_name
 delim = args.delimiter
+bins = 1000
+
+# Configure Jinja and ready the loader
+env = Environment(loader=FileSystemLoader(searchpath="templates"))
+
+# set up the templates used for adding to the file
+base = env.get_template(base_report.html)
+stat_section = env.get_template(stats_and_images.html)
+
 
 # check if the input is a directory or a file 
 if os.path.isdir(inpt) == True:
@@ -75,8 +67,6 @@ else:
     # if not simply add the input file to the run list
     file_list = [inpt]
 
-# make a html file start up and return as string
-#!# html = make_html.start(title) 
     
 # loop over all files we want to look at here 
 for f in file_list:
@@ -96,7 +86,10 @@ for f in file_list:
             ncol = 0
         
         df = pd.read_csv(f, sep=delim, header=ncol, index_col=nrow)
-       
+
+        df = df.replace([np.inf, -np.inf], 0) #remove any inf or -inf as these can not be ploted due to unlimited axises not being allowed in python
+        df = df.head(100)
+        # df = df[df.columns[1:1000]]
         data = df.values
             
         
@@ -106,10 +99,11 @@ for f in file_list:
         continue
 
     # plot figs for data and store as str64 to later add to the html file 
-    
+    # distrubution = make_hist.plot(data) # returns a base64 encoded html object depicting a histogram over distrubtutions
+    # heat = make_heatmap.plot(df) # returns a base64 html object contaning a heatmap over value distrubtutions in data
+    # pca = make_PCA.plot(df)# returns a 2D pca plot as a base64 html object for printing
 
     
-
     # now do things to the data:
     stats = {
         "mean":np.mean(data),
@@ -121,12 +115,14 @@ for f in file_list:
         "uniq":len(np.unique(data)),
         "elems":data.shape[0]*data.shape[1],
         "zeroes":len(np.where(data == 0)),
+        "nozero":(data.shape[0]*data.shape[1])-len(np.where(data == 0)),
         "variance":np.var(data),
         "skew":scipy.stats.skew(data).mean()
     }
 
     # add stats and plots to html file
-    #!# html = make_html.add(stats,dist_plot, heatmap, pca_plot)
-
+    
+    
+    
 # once all files are looped over and printed to html close and write html
 #!# make_html.write(out)

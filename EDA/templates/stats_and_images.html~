@@ -1,0 +1,4 @@
+<h2>{{ model }} - Model Results</h2>
+<p>General stats for file:</p>
+{{ table }}
+

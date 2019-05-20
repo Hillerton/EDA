@@ -1,0 +1,22 @@
+<h2>General stats for file: {{ file }}</h2>
+{{ table }}
+
+<!-- Tab links -->
+<div class="tab">
+  <button class="tablinks" onclick="open(event, 'dist')">hist</button>
+  <button class="tablinks" onclick="open(event, 'heat')">heat</button>
+  <button class="tablinks" onclick="open(event, 'pca')">pca</button>
+</div>
+
+<!-- Tab content -->
+<div id="hist" class="tabcontent">
+  {{ dist  }}
+</div>
+
+<div id="heat" class="tabcontent">
+  {{ heat }}
+</div>
+
+<div id="pca" class="tabcontent">
+  {{ pca }}
+</div>

@@ -10,7 +10,6 @@ import pandas as pd
 import scipy.stats # used to get a number of statistics out from the data
 from jinja2 import FileSystemLoader, Environment # used to generate the html report based on manualy created template files
 
-
 # plugins for the tool
 from bin import data_reader
 from bin import make_hist
@@ -40,7 +39,8 @@ parser.add_argument("out", action="store", help="Give a name for the HTML report
 parser.add_argument("--delim",dest="delimiter", action="store", default="\t", help="Give delimiter to seperate data with if it is not tab")
 parser.add_argument("--row_name", dest="row_name", action="store", default="False", help="Set to true to remove row names from tsv or csv file")
 parser.add_argument("--col_name", dest="col_name", action="store", default="None", help="Set to true to remove col names from tsv or csv file.")
-
+parser.add_argument("-t", dest="title", action="store", default="", help="Set title for html file.")
+parser.add_argument("-n", dest="limit", action="store", default=False, help="Give a value to limit columns and rows by.")
 
 args = parser.parse_args()
 
@@ -49,14 +49,18 @@ out = args.out
 rm_row_name = args.row_name
 rm_col_name = args.col_name
 delim = args.delimiter
-bins = 1000
+title=args.title
+n = args.limit
+
+script_path = os.path.abspath(__file__) # get the path to where this script is to find templates
+script_path = script_path[0:-11]
 
 # Configure Jinja and ready the loader
-env = Environment(loader=FileSystemLoader(searchpath="templates"))
+env = Environment(loader=FileSystemLoader(searchpath=script_path+"templates"))
 
 # set up the templates used for adding to the file
-base = env.get_template(base_report.html)
-stat_section = env.get_template(stats_and_images.html)
+base = env.get_template("base_report.html")
+stat_section = env.get_template("stats_and_images.html")
 
 
 # check if the input is a directory or a file 
@@ -89,8 +93,12 @@ for f in file_list:
         df = pd.read_csv(f, sep=delim, header=ncol, index_col=nrow)
 
         df = df.replace([np.inf, -np.inf], 0) #remove any inf or -inf as these can not be ploted due to unlimited axises not being allowed in python
-        df = df.head(100)
-        # df = df[df.columns[1:1000]]
+
+        if n:
+            print ("cutting down array to size",str(n)+" by "+str(n))
+            df = df.head(int(n)) # get the first n rows
+            df = df[df.columns[1:int(n)]] #get the first n columns
+
         data = df.values
             
         
@@ -100,30 +108,50 @@ for f in file_list:
         continue
 
     # plot figs for data and store as str64 to later add to the html file 
-    # distrubution = make_hist.plot(data) # returns a base64 encoded html object depicting a histogram over distrubtutions
-    # heat = make_heatmap.plot(df) # returns a base64 html object contaning a heatmap over value distrubtutions in data
-    # pca = make_PCA.plot(df)# returns a 2D pca plot as a base64 html object for printing
+    distrubution = make_hist.plot(data) # returns a base64 encoded html object depicting a histogram over distrubtutions
+    heat = make_heatmap.plot(df) # returns a base64 html object contaning a heatmap over value distrubtutions in data
+    pca = make_PCA.plot(df)# returns a 2D pca plot as a base64 html object for printing
 
     
     # now do things to the data:
-    stats = {
-        "mean":np.mean(data),
-        "std":np.std(data),
-        "median":np.median(data),
-        "max":np.amax(data),
-        "min":np.amin(data),
-        "snr":snr(data).mean(),
-        "uniq":len(np.unique(data)),
-        "elems":data.shape[0]*data.shape[1],
-        "zeroes":len(np.where(data == 0)),
-        "nozero":(data.shape[0]*data.shape[1])-len(np.where(data == 0)),
-        "variance":np.var(data),
-        "skew":scipy.stats.skew(data).mean()
+    stats = {"stats":[
+        np.mean(data), # "mean"
+        np.std(data), # "std"
+        np.median(data), # "median"
+        np.amax(data), # "max"
+        np.amin(data), # "min"
+        snr(data).mean(), # "snr"
+        len(np.unique(data)), # "uniq"
+        data.shape[0]*data.shape[1], # "elems"
+        len(np.where(data == 0)), # "zeroes"
+        (data.shape[0]*data.shape[1])-len(np.where(data == 0)), # "nozero"
+        np.var(data), # "variance"
+        scipy.stats.skew(data).mean() #"skew"
+        ]
     }
 
-    # add stats and plots to html file
+    stats_df = pd.DataFrame(stats, index=['mean', 'std', 'median', 'max', 'min', 'snr', 'uniq', 'elems', 'zeroes', 'nozero', 'variance', 'skew'])
+    stats_html = stats_df.to_html()
+
+    hist_html = '<img src="data:image/png;base64, {}">'.format(distrubution.decode('utf-8'))
+    heat_html = '<img src="data:image/png;base64, {}">'.format(heat.decode('utf-8'))
+    pca_html = '<img src="data:image/png;base64, {}">'.format(pca.decode('utf-8'))
     
-    
+    # add stats and plots to html list one for each file in file_list
+    tables.append(stat_section.render(
+        file=f,
+        table=stats_html,
+        hist=hist_html,
+        heat=heat_html,
+        pca=pca_html
+    ))
+
+writer = open(out, "w+") # open output file for writing
     
 # once all files are looped over and printed to html close and write html
-#!# make_html.write(out)
+writer.write(base.render(
+    title=title,
+    sections=tables
+))
+
+writer.close() # close output fiel before exiting as I am paranoid. 

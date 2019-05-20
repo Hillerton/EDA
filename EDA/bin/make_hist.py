@@ -12,13 +12,14 @@ def plot(array):
     from io import BytesIO
     
     plot_ray = array.flatten() # make 2D array 1D 
-    bins = math.ceil(len(plot_ray)*0.01) #make % of total numbers as bins
+    bins = math.ceil(len(plot_ray)*0.25) #make % of total numbers as bins
 
     byte_file = BytesIO()
     
     plt.hist(array.flatten(), bins=bins)
-    plt.savefig(byte_file, format="svg")
-
+    plt.savefig(byte_file, format="png")
+    byte_file.seek(0)
+    
     encod = base64.b64encode(byte_file.getvalue())
     
     return(encod)

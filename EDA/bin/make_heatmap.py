@@ -16,7 +16,7 @@ def plot(array):
     byte_file = BytesIO()
     
     ax = sns.heatmap(array, linewidths=0)
-    plt.savefig(byte_file, format="svg")
+    plt.savefig(byte_file, format="png")
 
     encod = base64.b64encode(byte_file.getvalue())
     

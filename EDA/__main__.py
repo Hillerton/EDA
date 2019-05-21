@@ -136,6 +136,8 @@ for f in file_list:
     hist_html = '<img src="data:image/png;base64, {}">'.format(distrubution.decode('utf-8'))
     heat_html = '<img src="data:image/png;base64, {}">'.format(heat.decode('utf-8'))
     pca_html = '<img src="data:image/png;base64, {}">'.format(pca.decode('utf-8'))
+    # pearson 
+    # spearman 
     
     # add stats and plots to html list one for each file in file_list
     tables.append(stat_section.render(

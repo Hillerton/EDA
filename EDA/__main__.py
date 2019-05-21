@@ -97,8 +97,9 @@ for f in file_list:
         if n:
             print ("cutting down array to size",str(n)+" by "+str(n))
             df = df.head(int(n)) # get the first n rows
-            df = df[df.columns[1:int(n)]] #get the first n columns
-
+           
+            df = df[df.columns[1:int(n)+1]] #get the first n columns OBS as this is none inclusive add +1 to n to get n columns. Else returns n-1 columns 
+        
         data = df.values
             
         
@@ -133,6 +134,7 @@ for f in file_list:
     stats_df = pd.DataFrame(stats, index=['mean', 'std', 'median', 'max', 'min', 'snr', 'uniq', 'elems', 'zeroes', 'nozero', 'variance', 'skew'])
     stats_html = stats_df.to_html()
 
+    
     hist_html = '<img src="data:image/png;base64, {}">'.format(distrubution.decode('utf-8'))
     heat_html = '<img src="data:image/png;base64, {}">'.format(heat.decode('utf-8'))
     pca_html = '<img src="data:image/png;base64, {}">'.format(pca.decode('utf-8'))
@@ -143,6 +145,7 @@ for f in file_list:
     tables.append(stat_section.render(
         file=f,
         table=stats_html,
+        t2=stats_html,
         hist=hist_html,
         heat=heat_html,
         pca=pca_html

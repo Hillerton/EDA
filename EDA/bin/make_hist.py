@@ -15,11 +15,13 @@ def plot(array):
     bins = math.ceil(len(plot_ray)*0.25) #make % of total numbers as bins
 
     byte_file = BytesIO()
-    
-    plt.hist(array.flatten(), bins=bins)
+
+    plt.hist(plot_ray, bins=bins)
+    # plt.show()
     plt.savefig(byte_file, format="png")
     byte_file.seek(0)
     
-    encod = base64.b64encode(byte_file.getvalue())
-    
-    return(encod)
+    encoded = base64.b64encode(byte_file.getvalue())
+    byte_file.close()
+    plt.close()
+    return(encoded)

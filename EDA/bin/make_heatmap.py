@@ -14,10 +14,13 @@ def plot(array):
     # array = np.random.rand(10,10)
     
     byte_file = BytesIO()
-    
+
+    figure = plt.figure()
     ax = sns.heatmap(array, linewidths=0)
-    plt.savefig(byte_file, format="png")
+
+    figure.savefig(byte_file, format="png")
 
     encod = base64.b64encode(byte_file.getvalue())
-    
+    byte_file.close()
+    plt.close()
     return(encod)

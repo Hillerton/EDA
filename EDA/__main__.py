@@ -72,14 +72,15 @@ else:
     file_list = [inpt]
 
 tables = list() # create an empty list to store the html objects with stats for each file in file list. This will later be added to the report in a for loop based fashion. 
-    
+
+c = 0
 # loop over all files we want to look at here 
 for f in file_list:
     # if file is matlab read it using the data reader tool
     if f.endswith(".mat"):
         # read data in to a 2D numpy array 
-        data = data_reader.read(f)
-    # else use the numpy loadtxt module to move the data to a 2D numpy array
+        #data = data_reader.read(f)
+        continue
 
     elif f.endswith(".csv") or f.endswith(".tsv"):
 
@@ -108,48 +109,81 @@ for f in file_list:
         print ("The file",f,"does not look like a .mat, .csv or .tsv file and should have been filtered out.\nStrange things might be going on with the code.")
         continue
 
+    distrubution = None
+    heat = None
+    pca = None
+    
     # plot figs for data and store as str64 to later add to the html file 
     distrubution = make_hist.plot(data) # returns a base64 encoded html object depicting a histogram over distrubtutions
     heat = make_heatmap.plot(df) # returns a base64 html object contaning a heatmap over value distrubtutions in data
     pca = make_PCA.plot(df)# returns a 2D pca plot as a base64 html object for printing
 
     
+    
     # now do things to the data:
-    stats = {"stats":[
+    stats1 = {"value":[
         np.mean(data), # "mean"
-        np.std(data), # "std"
         np.median(data), # "median"
         np.amax(data), # "max"
         np.amin(data), # "min"
-        snr(data).mean(), # "snr"
-        len(np.unique(data)), # "uniq"
-        data.shape[0]*data.shape[1], # "elems"
-        len(np.where(data == 0)), # "zeroes"
-        (data.shape[0]*data.shape[1])-len(np.where(data == 0)), # "nozero"
-        np.var(data), # "variance"
-        scipy.stats.skew(data).mean() #"skew"
         ]
     }
 
-    stats_df = pd.DataFrame(stats, index=['mean', 'std', 'median', 'max', 'min', 'snr', 'uniq', 'elems', 'zeroes', 'nozero', 'variance', 'skew'])
-    stats_html = stats_df.to_html()
+    stats1_df = pd.DataFrame(stats1, index=['mean', 'median', 'max', 'min',])
+    stats1_html = stats1_df.to_html()
 
+    stats2 = {"value":[
+        np.std(data), # "std"
+        np.var(data), # "variance"
+        scipy.stats.skew(data).mean(), #"skew"
+        snr(data).mean(), # "snr"
+        ]
+    }
+
+    stats2_df = pd.DataFrame(stats2, index=['standard deviation', 'variance', 'skewness',  'signal to noise',])
+    stats2_html = stats2_df.to_html()
     
+    
+    mat_params = {"value":[
+        data.shape[0]*data.shape[1], # "elems"
+        len(np.unique(data)), # "uniq"     
+        len(np.where(data == 0)), # "zeroes"
+        (data.shape[0]*data.shape[1])-len(np.where(data == 0)), # "nozero"
+        ],
+        "%":[
+            "",
+            len(np.unique(data))/data.shape[0]*data.shape[1], # "elems" "uniq"     
+            len(np.where(data == 0))/data.shape[0]*data.shape[1], # "elems" "zeroes"
+            (data.shape[0]*data.shape[1])-len(np.where(data == 0))/data.shape[0]*data.shape[1], # "elems" "nozero"
+        ]
+    } 
+
+    mat_df = pd.DataFrame(mat_params, index=('elems', 'uniq', 'zeroes', 'nozero',))
+    mat_html = mat_df.to_html()
+    
+    hist_html = None
+    heat_html = None
+    pca_html = None
+      
     hist_html = '<img src="data:image/png;base64, {}">'.format(distrubution.decode('utf-8'))
     heat_html = '<img src="data:image/png;base64, {}">'.format(heat.decode('utf-8'))
     pca_html = '<img src="data:image/png;base64, {}">'.format(pca.decode('utf-8'))
     # pearson 
     # spearman 
-    
+
     # add stats and plots to html list one for each file in file_list
     tables.append(stat_section.render(
         file=f,
-        table=stats_html,
-        t2=stats_html,
+        t1=mat_html,
+        t2=stats1_html,
+        t3=stats2_html,
         hist=hist_html,
         heat=heat_html,
-        pca=pca_html
+        pca=pca_html,
+        c=c
     ))
+    c+=1
+
 
 writer = open(out, "w+") # open output file for writing
     

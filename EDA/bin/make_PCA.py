@@ -33,8 +33,9 @@ def plot(array):
     ax.grid()
     
     byte_file = BytesIO()
-    plt.savefig(byte_file,format="png")
+    fig.savefig(byte_file,format="png")
     
-    encod = base64.b64encode(byte_file.getvalue())
-    
-    return(encod)
+    encoder = base64.b64encode(byte_file.getvalue())
+    byte_file.close()
+    plt.close()
+    return(encoder)

@@ -6,8 +6,7 @@ flake8
 #tool specific stuff
 pandas
 numpy
-os
-argpars
-scipy.stats
+argparse
+scipy
 jinja2
 matplotlib

@@ -10,3 +10,4 @@ argparse
 scipy
 jinja2
 matplotlib
+h5py

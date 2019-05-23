@@ -4,3 +4,10 @@ black
 flake8
 
 #tool specific stuff
+pandas
+numpy
+os
+argpars
+scipy.stats
+jinja2
+matplotlib

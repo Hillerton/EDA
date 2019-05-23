@@ -62,7 +62,6 @@ env = Environment(loader=FileSystemLoader(searchpath=script_path+"templates"))
 base = env.get_template("base_report.html")
 stat_section = env.get_template("stats_and_images.html")
 
-
 # check if the input is a directory or a file 
 if os.path.isdir(inpt) == True:
     # if it is a directory add all .mat/.csv/.tsv files to the run list 
@@ -79,8 +78,9 @@ for f in file_list:
     # if file is matlab read it using the data reader tool
     if f.endswith(".mat"):
         # read data in to a 2D numpy array 
-        #data = data_reader.read(f)
-        continue
+        data = data_reader.read(f, "YY")
+        print (data)
+        exit()
 
     elif f.endswith(".csv") or f.endswith(".tsv"):
 

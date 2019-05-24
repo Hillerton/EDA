@@ -8,6 +8,8 @@ import argparse
 import os
 import pandas as pd 
 import scipy.stats # used to get a number of statistics out from the data
+import scipy.io #used to read .mat files 
+
 from jinja2 import FileSystemLoader, Environment # used to generate the html report based on manualy created template files
 
 # plugins for the tool
@@ -39,6 +41,8 @@ parser.add_argument("out", action="store", help="Give a name for the HTML report
 parser.add_argument("--delim",dest="delimiter", action="store", default="\t", help="Give delimiter to seperate data with if it is not tab")
 parser.add_argument("--row_name", dest="row_name", action="store", default="False", help="Set to true to remove row names from tsv or csv file")
 parser.add_argument("--col_name", dest="col_name", action="store", default="None", help="Set to true to remove col names from tsv or csv file.")
+parser.add_argument("--form", dest="mat_format", action="store", default="None", help="Set format of any .mat files. Should be h5 or mat.")
+parser.add_argument("--desc", dest="description", action="store", default="None", help="Set which data set should be lifted from the matlab file. EG \"Y\" for sub dataset Y")
 parser.add_argument("-t", dest="title", action="store", default="", help="Set title for html file.")
 parser.add_argument("-n", dest="limit", action="store", default=False, help="Give a value to limit columns and rows by.")
 
@@ -51,6 +55,9 @@ rm_col_name = args.col_name
 delim = args.delimiter
 title=args.title
 n = args.limit
+mat_formt = args.mat_format
+mat_dataset = args.description
+
 
 script_path = os.path.abspath(__file__) # get the path to where this script is to find templates
 script_path = script_path[0:-11]
@@ -77,8 +84,15 @@ c = 0
 for f in file_list:
     # if file is matlab read it using the data reader tool
     if f.endswith(".mat"):
-        # read data in to a 2D numpy array 
-        data = data_reader.read(f, "YY")
+        # read data in to a 2D numpy array
+        if mat_formt == "h5":
+            data = data_reader.read(f, mat_dataset)
+        elif mat_formt == "mat":
+            data = scipy.io.loadmat(f)[mat_dataset]
+        else:
+            print ("The given format for matlab files must be h5 or mat")
+            exit(1)
+            
         print (data)
         exit()
 

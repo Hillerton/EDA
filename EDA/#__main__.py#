@@ -88,8 +88,7 @@ for f in file_list:
         if mat_formt == "h5":
             data = data_reader.read(f, mat_dataset)
         elif mat_formt == "mat":
-            data = scipy.io.loadmat(f) #[mat_dataset]
-            print(data)
+            data = scipy.io.loadmat(f)[mat_dataset]
         else:
             print ("The given format for matlab files must be h5 or mat")
             exit(1)
@@ -152,6 +151,7 @@ for f in file_list:
         np.var(data), # "variance"
         scipy.stats.skew(data).mean(), #"skew"
         snr(data).mean(), # "snr"
+        
         ]
     }
 

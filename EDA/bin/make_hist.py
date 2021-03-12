@@ -4,7 +4,9 @@ takes a numpy 2D array and bins as input and returnes a base64 html discription 
 """
 
 def plot(array):
-
+    
+    import matplotlib
+    #matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     import numpy as np
     import math
@@ -16,8 +18,7 @@ def plot(array):
 
     byte_file = BytesIO()
 
-    plt.hist(plot_ray, bins=bins)
-    # plt.show()
+    plt.hist(plot_ray, bins=bins, histtype="step")
     plt.savefig(byte_file, format="png")
     byte_file.seek(0)
     

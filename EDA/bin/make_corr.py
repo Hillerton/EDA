@@ -5,18 +5,18 @@ takes a numpy 2D array and bins as input and returnes a base64 html discription 
 
 def plot(array):
 
-    import matplotlib
-    matplotlib.use('Agg')    
+    import seaborn as sns
     import matplotlib.pylab as plt
     import numpy as np
-    import seaborn as sns
     import base64
     from io import BytesIO
 
     byte_file = BytesIO()
 
+    data = np.corrcoef(array)
+
     figure = plt.figure()
-    ax = sns.heatmap(array, linewidths=0)
+    ax = sns.heatmap(data, linewidths=0)
 
     figure.savefig(byte_file, format="png")
 
@@ -24,3 +24,4 @@ def plot(array):
     byte_file.close()
     plt.close()
     return(encod)
+    

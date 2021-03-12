@@ -5,6 +5,8 @@ takes a numpy 2D array and bins as input and returnes a base64 html discription 
 
 def plot(array):
 
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pylab as plt
     import numpy as np
     from sklearn.decomposition import PCA
